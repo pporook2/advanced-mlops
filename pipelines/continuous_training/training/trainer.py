@@ -138,7 +138,7 @@ class Trainer:
                 mlflow.log_params(
                     {key: cls.get_params()[key] for key in params}
                 )
-                mlflow.log_param("iterations", cls.best_iteration_)
+                mlflow.log_param({"iterations": cls.best_iteration_})
                 mlflow.log_metrics(
                     self._parse_score_dict(
                         cls.get_best_score().get("validation")
