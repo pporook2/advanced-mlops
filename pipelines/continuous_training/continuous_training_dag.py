@@ -2,10 +2,9 @@ import os
 from datetime import datetime
 
 import pendulum
-from airflow import DAG
-from airflow.models import Variable
-from airflow.operators.bash import BashOperator
 from airflow.providers.common.sql.operators.sql import SQLExecuteQueryOperator
+from airflow.providers.standard.operators.bash import BashOperator
+from airflow.sdk import DAG, Variable
 
 from utils.callbacks import failure_callback, success_callback
 from utils.common import read_sql_file
@@ -34,7 +33,7 @@ with DAG(
     schedule=None,
     start_date=datetime(2025, 1, 1, tzinfo=local_timezone),
     catchup=False,
-    tags=["lgcns", "mlops"],
+    tags=set(["lgcns", "mlops"]),
 ) as dag:
     data_extract = SQLExecuteQueryOperator(
         task_id="data_extraction",

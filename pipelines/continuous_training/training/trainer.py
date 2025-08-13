@@ -2,7 +2,6 @@ import os
 import shutil
 from datetime import datetime
 from itertools import product
-from typing import Dict, List, Tuple
 
 import bentoml
 import mlflow
@@ -138,7 +137,7 @@ class Trainer:
                 mlflow.log_params(
                     {key: cls.get_params()[key] for key in params}
                 )
-                mlflow.log_param({"iterations": cls.best_iteration_})
+                mlflow.log_param("iterations", cls.best_iteration_)
                 mlflow.log_metrics(
                     self._parse_score_dict(
                         cls.get_best_score().get("validation")
@@ -212,12 +211,12 @@ class Trainer:
 
     def _load_data(
         self,
-    ) -> Tuple[pd.DataFrame, npt.NDArray, pd.DataFrame, npt.NDArray]:
+    ) -> tuple[pd.DataFrame, npt.NDArray, pd.DataFrame, npt.NDArray]:
         """데이터를 불러옵니다.
         불러온 데이터를 `x_train, y_train, x_val, y_val` 로 반환합니다.
 
         Returns:
-            Tuple[pd.DataFrame, npt.NDArray, pd.DataFrame, npt.NDArray]: _description_
+            tuple[pd.DataFrame, npt.NDArray, pd.DataFrame, npt.NDArray]: _description_
         """
         train = pd.read_csv(
             os.path.join(
@@ -256,14 +255,14 @@ class Trainer:
         )
 
     @staticmethod
-    def _get_params_set(params: Dict) -> List:
+    def _get_params_set(params: dict) -> list:
         """하이퍼파라미터 후보 딕셔너리를 리스트로 변환합니다.
 
         Args:
-            params (Dict): 하이퍼파라미터 후보 딕셔너리
+            params (dict): 하이퍼파라미터 후보 딕셔너리
 
         Returns:
-            List: 하이퍼파라미터 후보 리스트
+            list: 하이퍼파라미터 후보 리스트
         """
         params_keys = params.keys()
         params_values = [
@@ -276,16 +275,16 @@ class Trainer:
         ]
 
     @staticmethod
-    def _parse_score_dict(score_dict: Dict) -> Dict:
+    def _parse_score_dict(score_dict: dict) -> dict:
         """Catboost 모델 결과 딕셔너리를 파싱합니다.
         MLflow에서는 딕셔너리 키에 `=`를 허용하지 않습니다.
         해당 문자를 공백으로 치환합니다.
 
         Args:
-            score_dict (Dict): 모델 학습 결과
+            score_dict (dict): 모델 학습 결과
 
         Returns:
-            Dict: 키 변환 후 모델 학습 결과
+            dict: 키 변환 후 모델 학습 결과
         """
         return {k.replace("=", " "): v for k, v in score_dict.items()}
 

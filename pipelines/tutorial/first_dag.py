@@ -2,8 +2,8 @@ from datetime import datetime, timedelta
 from textwrap import dedent
 
 import pendulum
-from airflow import DAG
-from airflow.operators.bash import BashOperator
+from airflow.providers.standard.operators.bash import BashOperator
+from airflow.sdk import DAG
 
 from utils.callbacks import failure_callback, success_callback
 
@@ -26,7 +26,7 @@ with DAG(
     schedule="0 15 * * *",
     start_date=datetime(2025, 3, 1, tzinfo=local_timezone),
     catchup=False,
-    tags=["lgcns", "mlops"],
+    tags=set(["lgcns", "mlops"]),
 ) as dag:
     task1 = BashOperator(
         task_id="print_date",

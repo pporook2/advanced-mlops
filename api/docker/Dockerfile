@@ -1,4 +1,6 @@
-FROM python:3.11-slim
+FROM python:3.12-slim-bookworm
+LABEL maintainer="otzslayer@gmail.com"
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
 ARG USER_HOME=/home/codespace
 ARG UTIL_PATH=utils
@@ -13,14 +15,13 @@ COPY --chown=codespace:codespace ${API_PATH}/requirements.txt ${USER_HOME}/
 COPY --chown=codespace:codespace ${API_PATH}/services.py ${USER_HOME}/
 COPY --chown=codespace:codespace ${API_PATH}/src/ ${USER_HOME}/${API_PATH}/src
 
-RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
-
 USER codespace
-
-RUN pip install --no-cache-dir \
-    --trusted-host pypi.org --trusted-host files.pythonhosted.org \
-    -r ${USER_HOME}/requirements.txt
-
-ENV PATH="${USER_HOME}/.local/bin:${PATH}"
-
 WORKDIR ${USER_HOME}/${API_PATH}
+ENV PYTHONUNBUFFERED=1 \
+    VIRTUAL_ENV="${USER_HOME}/${API_PATH}/.venv"
+
+ENV PATH="${VIRTUAL_ENV}/bin:${USER_HOME}/.local/bin:${PATH}"
+
+RUN uv init --python 3.12 \
+    && uv venv --python 3.12 --seed \
+    && uv pip install -r ${USER_HOME}/requirements.txt

@@ -1,22 +1,22 @@
 from datetime import datetime
-from typing import List
 
 import bentoml
 import pendulum
 import requests
-from airflow import DAG
-from airflow.operators.bash import BashOperator
-from airflow.operators.python import PythonOperator, BranchPythonOperator
-from airflow.models import Variable
+from airflow.providers.standard.operators.bash import BashOperator
+from airflow.providers.standard.operators.python import (
+    BranchPythonOperator,
+    PythonOperator,
+)
+from airflow.sdk import DAG, Variable
 
 from utils.callbacks import failure_callback, success_callback
-
 
 local_timezone = pendulum.timezone("Asia/Seoul")
 airflow_dags_path = Variable.get("AIRFLOW_DAGS_PATH")
 
 
-def get_branch_by_api_status() -> List[str] | str:
+def get_branch_by_api_status() -> list[str] | str:
     try:
         response = requests.get("http://localhost:3000/healthz")
         if response.status_code == 200:
@@ -107,7 +107,7 @@ with DAG(
     schedule=None,
     start_date=datetime(2025, 1, 1, tzinfo=local_timezone),
     catchup=False,
-    tags=["lgcns", "mlops"],
+    tags=set(["lgcns", "mlops"]),
 ) as dag:
     # API 상태 체크 결과 가져오기
     get_api_status_task = BranchPythonOperator(
@@ -140,6 +140,7 @@ with DAG(
         task_id="deploy_new_model",
         bash_command=f"cd {airflow_dags_path}/api/docker &&"
         "docker compose up --build --detach",
+        trigger_rule="one_success",
     )
 
     # 배포를 건너뛸 경우 실행할 더미 태스크

@@ -1,5 +1,5 @@
 import os
-from typing import List, Optional, Tuple
+from typing import Optional
 
 import joblib
 import numpy.typing as npt
@@ -7,7 +7,7 @@ import pandas as pd
 from dotenv import load_dotenv
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import RobustScaler
-from sqlalchemy import create_engine, text
+from sqlalchemy import create_engine
 
 from utils.dates import DateValues
 
@@ -98,7 +98,7 @@ class Preprocessor:
         """
 
         with engine.connect() as conn:
-            data = pd.read_sql(text(q), con=conn)
+            data = pd.read_sql(q, con=conn.connection)
 
         if data.empty:
             raise ValueError("Fetched data is empty! :(")
@@ -110,7 +110,7 @@ class Preprocessor:
         data: pd.DataFrame,
         val_size: Optional[float] = 0.3,
         random_state: Optional[int] = 42,
-    ) -> Tuple[pd.DataFrame, npt.NDArray, pd.DataFrame, npt.NDArray]:
+    ) -> tuple[pd.DataFrame, npt.NDArray, pd.DataFrame, npt.NDArray]:
         """데이터를 학습/검증 그리고 피처, 타겟으로 나눕니다.
 
         Args:
@@ -121,7 +121,7 @@ class Preprocessor:
                 Defaults to 42.
 
         Returns:
-            Tuple[pd.DataFrame, npt.NDArray, pd.DataFrame, npt.NDArray]:
+            tuple[pd.DataFrame, npt.NDArray, pd.DataFrame, npt.NDArray]:
                 학습 피처, 학습 타겟, 검증 피처, 검증 타겟
         """
         train, val = train_test_split(
@@ -140,17 +140,17 @@ class Preprocessor:
         self,
         x_train: pd.DataFrame,
         x_val: pd.DataFrame,
-        features: Optional[List[str]] = __ROBUST_SCALING_FEATURES,
-    ) -> Tuple[pd.DataFrame, pd.DataFrame]:
+        features: list[str] = __ROBUST_SCALING_FEATURES,
+    ) -> tuple[pd.DataFrame, pd.DataFrame]:
         """RobustScaler를 이용해서 수치형 변수를 스케일링합니다.
 
         Args:
             data (pd.DataFrame): 데이터
-            features (Optional[List[str]], optional): 대상 피처
+            features (list[str], optional): 대상 피처
                 Defaults to `self.__ROBUST_SCALING_FEATURES`.
 
         Returns:
-            Tuple[pd.DataFrame, pd.DataFrame]: 스케일링 완료 후 데이터 (학습, 검증)
+            tuple[pd.DataFrame, pd.DataFrame]: 스케일링 완료 후 데이터 (학습, 검증)
         """
         robust_scalers = {}
 
@@ -167,7 +167,6 @@ class Preprocessor:
         )
 
         return x_train, x_val
-
 
     def _make_dirs(self) -> None:
         """저장될 경로가 존재하지 않으면 해당 폴더를 생성합니다."""
@@ -219,10 +218,16 @@ if __name__ == "__main__":
     )
 
     parser.add_argument(
-        "--model_name", type=str, default="credit_score_classification"
+        "--model_name",
+        type=str,
+        default="credit_score_classification",
+        dest="model_name",
     )
     parser.add_argument(
-        "--base_dt", type=str, default=DateValues.get_current_date()
+        "--base_dt",
+        type=str,
+        default=DateValues.get_current_date(),
+        dest="base_dt",
     )
 
     args = parser.parse_args()

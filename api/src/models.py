@@ -1,5 +1,6 @@
-from sqlalchemy import Column, Integer, String, Float, JSON, DateTime, func
-from src.db import Base
+from sqlalchemy import JSON, Column, DateTime, Float, Integer, String, func
+
+from api.src.db import Base
 
 
 class CreditPredictionApiLog(Base):

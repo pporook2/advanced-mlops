@@ -1,3 +1,7 @@
+from datetime import datetime
+from typing import Any, Dict
+
+from bentoml import IODescriptor
 from pydantic import BaseModel, field_validator
 
 
@@ -54,3 +58,10 @@ class Response(BaseModel):
     customer_id: int
     predict: str
     confidence: float
+
+
+class MetadataResponse(IODescriptor):
+    model_name: str
+    model_version: str
+    params: Dict[str, Any]
+    creation_time: datetime
