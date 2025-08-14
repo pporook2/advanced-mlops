@@ -145,7 +145,7 @@ class Trainer:
                 )
                 mlflow.catboost.log_model(
                     cls,
-                    "CatBoostClassifier",
+                    name="CatBoostClassifier",
                     signature=infer_signature(x_train, cls.predict(x_train)),
                 )
                 mlflow.catboost.save_model(
@@ -191,7 +191,8 @@ class Trainer:
         Args:
             model_info (Run): MLflow에서 얻은 모델 정보
         """
-        model_uri = f"{model_info.info.artifact_uri}/CatBoostClassifier"
+        run_id = model_info.info.run_id
+        model_uri = f"runs:/{run_id}/CatBoostClassifier"
         model_params = model_info.data.params
 
         bentoml.catboost.save_model(
@@ -297,10 +298,16 @@ if __name__ == "__main__":
     )
 
     parser.add_argument(
-        "--model_name", type=str, default="credit_score_classification"
+        "--model_name",
+        type=str,
+        default="credit_score_classification",
+        dest="model_name",
     )
     parser.add_argument(
-        "--base_dt", type=str, default=DateValues.get_current_date()
+        "--base_dt",
+        type=str,
+        default=DateValues.get_current_date(),
+        dest="base_dt",
     )
 
     args = parser.parse_args()
