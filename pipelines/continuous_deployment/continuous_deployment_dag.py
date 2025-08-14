@@ -8,7 +8,7 @@ from airflow.providers.standard.operators.python import (
     BranchPythonOperator,
     PythonOperator,
 )
-from airflow.sdk import DAG, Variable
+from airflow.sdk import DAG, Variable, get_current_context
 
 from utils.callbacks import failure_callback, success_callback
 
@@ -17,6 +17,10 @@ airflow_dags_path = Variable.get("AIRFLOW_DAGS_PATH")
 
 
 def get_branch_by_api_status() -> list[str] | str:
+    """
+    API 상태를 확인하여 분기를 결정하는 함수.
+    Airflow 3.x에서는 provide_context가 제거되어 함수 시그니처 변경 불필요.
+    """
     try:
         response = requests.get("http://localhost:3000/healthz")
         if response.status_code == 200:
@@ -59,11 +63,16 @@ def get_latest_trained_model_creation_time() -> datetime | None:
         return None
 
 
-def decide_model_update(ti):
+def decide_model_update():
     """
     현재 배포된 모델과 로컬 최신 학습 모델의 creation_time 비교.
     배포된 모델이 오래되었으면 새로운 모델을 배포하도록 결정.
+
+    Airflow 3.x에서는 명시적으로 ti를 인자로 받는 것을 권장하지만,
+    기존 코드와의 호환성을 위해 이 방식도 계속 지원.
     """
+    context = get_current_context()
+    ti = context["ti"]
     api_status = ti.xcom_pull(task_ids="get_branch_by_api_status")
 
     if api_status == "deploy_new_model":
@@ -113,7 +122,6 @@ with DAG(
     get_api_status_task = BranchPythonOperator(
         task_id="get_branch_by_api_status",
         python_callable=get_branch_by_api_status,
-        provide_context=True,
     )
 
     # 현재 컨테이너에서 실행 중인 모델의 creation_time 가져오기
@@ -129,10 +137,10 @@ with DAG(
     )
 
     # 모델을 업데이트할지 결정
+    # provide_context=True 매개변수 제거됨
     decide_update_task = BranchPythonOperator(
         task_id="decide_update",
         python_callable=decide_model_update,
-        provide_context=True,
     )
 
     # 새로운 모델을 배포
