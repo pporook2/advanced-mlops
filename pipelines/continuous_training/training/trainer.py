@@ -80,6 +80,46 @@ class Trainer:
 
         mlflow.set_experiment(self._experiment_name)
 
+        # 가독성을 위해 정적 파라미터를 딕셔너리로 분리
+        catboost_static_params = {
+            "loss_function": "MultiClassOneVsAll",
+            "learning_rate": 0.3,
+            "iterations": 2000,
+            "thread_count": -1,
+            "random_seed": 42,
+            "verbose": 50,
+            "custom_metric": ["F1", "Accuracy"],
+            "text_processing": {
+                "tokenizers": [
+                    {
+                        "tokenizer_id": "Space",
+                        "separator_type": "ByDelimiter",
+                        "delimiter": " ",
+                    },
+                    {
+                        "tokenizer_id": "Comma",
+                        "separator_type": "ByDelimiter",
+                        "delimiter": ",",
+                    },
+                    {
+                        "tokenizer_id": "Underscore",
+                        "separator_type": "ByDelimiter",
+                        "delimiter": "_",
+                    },
+                ],
+                "dictionaries": [
+                    {
+                        "dictionary_id": "BiGram",
+                        "occurence_lower_bound": 1,
+                    },
+                    {
+                        "dictionary_id": "Word",
+                        "occurence_lower_bound": 1,
+                    },
+                ],
+            },
+        }
+
         for i, params in enumerate(tqdm(param_set)):
             run_name = f"Run {i}"
             artifacts_path = os.path.join(
@@ -87,52 +127,14 @@ class Trainer:
             )
 
             with mlflow.start_run(run_name=run_name):
-                cls = CatBoostClassifier(
-                    **params,
-                    loss_function="MultiClassOneVsAll",
-                    learning_rate=0.3,
-                    iterations=2000,
-                    thread_count=-1,
-                    random_seed=42,
-                    verbose=50,
-                    custom_metric=["F1", "Accuracy"],
-                    text_processing={
-                        "tokenizers": [
-                            {
-                                "tokenizer_id": "Space",
-                                "separator_type": "ByDelimiter",
-                                "delimiter": " ",
-                            },
-                            {
-                                "tokenizer_id": "Comma",
-                                "separator_type": "ByDelimiter",
-                                "delimiter": ",",
-                            },
-                            {
-                                "tokenizer_id": "Underscore",
-                                "separator_type": "ByDelimiter",
-                                "delimiter": "_",
-                            },
-                        ],
-                        "dictionaries": [
-                            {
-                                "dictionary_id": "BiGram",
-                                "occurence_lower_bound": 1,
-                            },
-                            {
-                                "dictionary_id": "Word",
-                                "occurence_lower_bound": 1,
-                            },
-                        ],
-                    },
-                )
+                cls = CatBoostClassifier(**params, **catboost_static_params)
                 cls.fit(
                     train_pool,
                     eval_set=val_pool,
                     early_stopping_rounds=50,
                 )
 
-                # # MLflow logging
+                # MLflow 로깅
                 mlflow.set_tag("estimator_name", cls.__class__.__name__)
                 mlflow.log_params(
                     {key: cls.get_params()[key] for key in params}
@@ -149,7 +151,7 @@ class Trainer:
                     signature=infer_signature(x_train, cls.predict(x_train)),
                 )
                 mlflow.catboost.save_model(
-                    cls,
+                    cb_model=cls,
                     path=artifacts_path,
                 )
 
@@ -195,8 +197,9 @@ class Trainer:
         model_uri = f"runs:/{run_id}/CatBoostClassifier"
         model_params = model_info.data.params
 
+        # 모델 이름을 self._model_name으로 동적 설정
         bentoml.catboost.save_model(
-            name="credit_score_classifier",
+            name=self._model_name,
             model=mlflow.catboost.load_model(model_uri),
             signatures={"predict": {"batchable": True, "batch_dim": 0}},
             metadata=model_params,
