@@ -20,6 +20,10 @@ sql_file_path = os.path.join(
     "features.sql",
 )
 
+kst_ds_template = (
+    "{{ data_interval_start.in_timezone('Asia/Seoul').to_date_string() }}"
+)
+
 with DAG(
     dag_id="credit_score_classification_ct",
     default_args={
@@ -49,7 +53,7 @@ with DAG(
         env={
             "PYTHON_FILE": "/home/codespace/data_preprocessing/preprocessor.py",
             "MODEL_NAME": "credit_score_classification",
-            "BASE_DT": "{{ ds }}",
+            "BASE_DT": kst_ds_template,
         },
         append_env=True,
         retries=1,
@@ -62,7 +66,7 @@ with DAG(
         env={
             "PYTHON_FILE": "/home/codespace/training/trainer.py",
             "MODEL_NAME": "credit_score_classification",
-            "BASE_DT": "{{ ds }}",
+            "BASE_DT": kst_ds_template,
         },
         append_env=True,
         retries=1,

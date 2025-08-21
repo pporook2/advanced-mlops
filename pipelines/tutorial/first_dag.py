@@ -41,9 +41,10 @@ with DAG(
 
     loop_command = dedent(
         """
+        {% set kst_ds = data_interval_start.in_timezone('Asia/Seoul').to_date_string() %}
         {% for i in range(5) %}
-            echo "ds = {{ ds }}"
-            echo "macros.ds_add(ds, {{ i }}) = {{ macros.ds_add(ds, i) }}"
+            echo "ds = {{ kst_ds }}"
+            echo "macros.ds_add(ds, {{ i }}) = {{ macros.ds_add(kst_ds, i) }}"
         {% endfor %}
         """
     )

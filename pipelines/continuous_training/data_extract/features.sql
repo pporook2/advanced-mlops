@@ -2,12 +2,12 @@
 DELETE FROM mlops.credit_score_features_target
 WHERE base_dt <= DATE_FORMAT(
         DATE_ADD(
-            STR_TO_DATE('{{ ds }}', '%Y-%m-%d'),
+            STR_TO_DATE('{{ data_interval_start.in_timezone(\'Asia/Seoul\').to_date_string() }}', '%Y-%m-%d'),
             INTERVAL -7 DAY
         ),
         '%Y-%m-%d'
     ) OR 
-    base_dt = STR_TO_DATE('{{ ds }}', '%Y-%m-%d');
+    base_dt = STR_TO_DATE('{{ data_interval_start.in_timezone(\'Asia/Seoul\').to_date_string() }}', '%Y-%m-%d');
     
 -- 2. 새로운 데이터 삽입
 INSERT INTO mlops.credit_score_features_target (
@@ -39,7 +39,7 @@ INSERT INTO mlops.credit_score_features_target (
         monthly_balance,
         credit_score
     )
-SELECT STR_TO_DATE('{{ ds }}', '%Y-%m-%d') AS base_dt,
+SELECT STR_TO_DATE('{{ data_interval_start.in_timezone(\'Asia/Seoul\').to_date_string() }}', '%Y-%m-%d') AS base_dt,
     b.id,
     b.customer_id,
     b.date,
@@ -71,9 +71,9 @@ FROM mlops.credit_score_features a
         SELECT *
         FROM mlops.credit_score
         WHERE date BETWEEN DATE_ADD(
-                STR_TO_DATE('{{ ds }}', '%Y-%m-%d'),
+                STR_TO_DATE('{{ data_interval_start.in_timezone(\'Asia/Seoul\').to_date_string() }}', '%Y-%m-%d'),
                 INTERVAL -1 MONTH
             )
-            AND STR_TO_DATE('{{ ds }}', '%Y-%m-%d')
+            AND STR_TO_DATE('{{ data_interval_start.in_timezone(\'Asia/Seoul\').to_date_string() }}', '%Y-%m-%d')
     ) b ON a.id = b.id
     AND a.customer_id = b.customer_id; 
