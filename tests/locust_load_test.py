@@ -60,5 +60,6 @@ class CreditScoreUser(HttpUser):
     @task
     def predict(self):
         headers = {"Content-Type": "application/json"}
-        data = get_random_features()
-        self.client.post("/predict", json=data, headers=headers)
+        features = get_random_features()
+        payload = {"data": features}
+        self.client.post("/predict", json=payload, headers=headers)
