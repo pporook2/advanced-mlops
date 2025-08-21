@@ -55,12 +55,13 @@ class CreditScoreClassifier:
         self.session_maker = SessionLocal
 
     @bentoml.api
-    async def predict(self, data: Features) -> Response:
+    def predict(self, data: Features) -> Response:
         """
         입력된 고객 특징(features)을 기반으로 신용 등급을 예측합니다.
 
         Args:
             data (Features): 예측에 사용할 고객 특징 데이터입니다.
+            ctx (Context): 요청 컨텍스트로, DB 세션에 접근하는 데 사용됩니다.
 
         Returns:
             Response: 예측된 신용 등급과 신뢰도 점수를 포함하는 응답입니다.
@@ -83,8 +84,8 @@ class CreditScoreClassifier:
             confidence=prob,
             elapsed_ms=elapsed_ms,
         )
-        async with self.session_maker() as db:
-            async with db.begin():
+        with self.session_maker() as db:
+            with db.begin():
                 db.add(record)
 
         return Response(customer_id=customer_id, predict=label, confidence=prob)
