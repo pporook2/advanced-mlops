@@ -1,7 +1,7 @@
 import argparse
 import os
 import shutil
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime
 from itertools import product
 from typing import Dict, List, Tuple
@@ -30,13 +30,18 @@ class TrainingConfig:
     base_dt: str
     artifacts_path: str = os.getenv("ARTIFACTS_PATH", "")
     target_name: str = "credit_score"
-    drop_cols: List[str] = list(("base_dt", "id", "customer_id", "date"))
-    text_cols: List[str] = list(("type_of_loan", "payment_behaviour"))
-    categorical_cols: List[str] = list(
-        ("occupation", "credit_mix", "payment_of_min_amount")
+    
+    drop_cols: List[str] = field(
+        default_factory=lambda: ["base_dt", "id", "customer_id", "date"]
     )
-    params_candidates: Dict[str, List] = dict(
-        {
+    text_cols: List[str] = field(
+        default_factory=lambda: ["type_of_loan", "payment_behaviour"]
+    )
+    categorical_cols: List[str] = field(
+        default_factory=lambda: ["occupation", "credit_mix", "payment_of_min_amount"]
+    )
+    params_candidates: Dict[str, List] = field(
+        default_factory=lambda: {
             "depth": [7, 8, 9],
             "rsm": [0.8, 0.9, 1.0],
             "l2_leaf_reg": [3, 5, 7],
