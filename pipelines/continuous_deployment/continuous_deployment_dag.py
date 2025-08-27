@@ -56,7 +56,7 @@ def get_deployed_model_creation_time() -> datetime | None:
 def get_latest_trained_model_creation_time() -> datetime | None:
     """로컬 저장소에 저장된 최신 학습 모델의 `creation_time` 조회합니다."""
     try:
-        bento_model = bentoml.models.get("credit_score_classifier:latest")
+        bento_model = bentoml.models.get("credit_score_classification:latest")
         return bento_model.info.creation_time.replace(tzinfo=None)
     except Exception as e:
         print(f"Error getting latest trained model creation time: {e}")

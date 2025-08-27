@@ -44,7 +44,9 @@ class CreditScoreClassifier:
         서비스를 초기화하고 필요한 모델과 인코더를 로드합니다.
         """
         self.session_maker = None
-        self.bento_model = bentoml.models.get("credit_score_classifier:latest")
+        self.bento_model = bentoml.models.get(
+            "credit_score_classification:latest"
+        )
         self.robust_scalers = joblib.load(
             os.path.join(encoder_path, "robust_scaler.joblib")
         )

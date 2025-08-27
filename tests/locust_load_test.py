@@ -1,8 +1,3 @@
-# How to run this script:
-# 1. Install locust: pip install locust
-# 2. Run the BentoML server in a separate terminal: bentoml serve api/services.py:CreditScoreClassifier --reload
-# 3. Run locust: locust -f locust_load_test.py --host http://localhost:3000
-
 import random
 
 from locust import HttpUser, between, task
