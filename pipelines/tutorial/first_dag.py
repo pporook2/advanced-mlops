@@ -11,10 +11,11 @@ local_timezone = pendulum.timezone("Asia/Seoul")
 
 with DAG(
     dag_id="simple_dag",
+
     default_args={
         "owner": "user",
         "depends_on_past": False,
-        "email": "jaeyoon.han@lgcns.com",
+        "email": "jm-lee@lgcns.com",
         "email_on_failure": False,
         "email_on_retry": False,
         "retries": 1,
