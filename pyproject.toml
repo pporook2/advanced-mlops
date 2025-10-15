@@ -11,7 +11,7 @@ dependencies = [
     "bentoml==1.4.19",
     "catboost==1.2.8",
     "fastapi==0.116.1",
-    "locust>=2.39.0",
+    "locust==2.39.0",
     "mlflow==3.2.0",
     "mysqlclient==2.2.7",
     "numpy==2.3.2",
@@ -24,4 +24,8 @@ dependencies = [
 ]
 
 [dependency-groups]
-jupyter = ["ipykernel>=6.29.5", "ipython>=8.31.0", "jupyter>=1.1.1"]
+jupyter = [
+    "ipykernel>=6.29.5",
+    "ipython>=8.31.0",
+    "jupyter>=1.1.1",
+]
