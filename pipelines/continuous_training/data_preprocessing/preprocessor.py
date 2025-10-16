@@ -97,6 +97,7 @@ class Preprocessor:
             where base_dt = '{self._base_dt}'
         """
 
+        # SqlAlchemy 이용
         with engine.connect() as conn:
             data = pd.read_sql(q, con=conn.connection)
 
