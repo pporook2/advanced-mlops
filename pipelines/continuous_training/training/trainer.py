@@ -253,6 +253,7 @@ class Trainer:
             signatures={"predict": {"batchable": True, "batch_dim": 0}},
             metadata=best_run.data.params,
         )
+
         print(f"최적 모델을 BentoML에 저장 완료: {self._config.model_name}")
 
     @staticmethod
@@ -329,12 +330,14 @@ def main():
         type=str,
         default="credit_score_classification",
         help="학습할 모델의 이름",
+        dest="model_name"
     )
     parser.add_argument(
         "--base_dt",
         type=str,
         default=DateValues.get_current_date(),
         help="데이터의 기준 날짜 (YYYY-MM-DD 형식)",
+        dest="base_dt"
     )
     args = parser.parse_args()
 
